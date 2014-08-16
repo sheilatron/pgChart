@@ -7,8 +7,49 @@
 import os.path
 import webbrowser
 import string
+import copy
 
-def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=None , chartOptions=None , chartFileName=None, chartTitle=None, chartLabels=None):
+def pg1VarTable(chartableDict):
+    """ Inputs the chartableDict from pgChart and creates a html table for use 
+    in the HTML file for use with single data point per label
+    """
+    htmlDataChart = ''
+    for datum in chartableDict.keys():
+        # add a label and data row to the htmlDataChart
+        if htmlDataChart:
+            htmlDataChart +=',' # if its not blank put a comma at the end, saves unneeded trailing comma         
+        if datum.find("'") + 1 : # fix raw ' in labels find returns -1 if not found so +1 evals to zero => False
+            fixed_datum = datum
+            fixed_datum = fixed_datum.replace("'","feet")
+            htmlDataChart += "\n          ['" + fixed_datum  + "',   " + str(chartableDict[datum]) + '  ]' 
+        else: 
+            htmlDataChart += "\n          ['" + str(datum) + "',   " + str(chartableDict[datum]) + '  ]' 
+    htmlDataChart += '\n        ]);\n'    #close char
+    return htmlDataChart
+
+def pgXVarTable(chartableDict):
+    """ Inputs the chartableDict from pgChart and creates a html table for use 
+    in the HTML file for use with multiple data points per label
+    """
+    htmlDataChart = ''
+    for data in chartableDict.keys():
+        # add a label and data row to the htmlDataChart
+        if htmlDataChart:
+            htmlDataChart +=',' # if the chart is not blank put a comma at the end, saves unneeded trailing comma         
+        if str(data).find("'") + 1 : # fix raw ' in labels find returns -1 if not found so +1 evals to zero => False
+            fixed_datum = data
+            fixed_datum = fixed_datum.replace("'","feet") #raw ' causes issues 
+            htmlDataChart += "'" + fixed_datum  + "'"  # add data one at a time to the line
+        else: 
+            htmlDataChart += "\n          ['" + str(data) + "'" #for each data entry create a new line.
+        for datum in chartableDict[data]:
+            htmlDataChart += ",   " + str(datum) + " " # add data one at a time to the line        
+        htmlDataChart +=  '  ]' # close the line
+    htmlDataChart += '\n        ]);\n'    #close chart    
+    return htmlDataChart
+    
+
+def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=None , chartOptions=None , chartFileName=None, chartTitle=None, chartLabels=[]):
     """Takes a dictionary with the subset of data that we want and makes a chart 
     Input : chartableDict 
         "chartTitle" => the title of the new chart, also the basis for the title of chart object
@@ -23,7 +64,7 @@ def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=N
     Output: a file named whatever the chartableDict['control chart title'] + '.html',
         or, if absent or blank, chart\d+.html w/ \d+ as lowest possible choice starting at zero        
     TO DO:
-    use http://www.pythoncentral.io/fun-with-python-function-parameters/ to remove silly dict entries for chart control.
+    Split off each chart type to its own function called by this function so my code is more modular.
     add an option returnhtml to return a string of HTML  such that putting many charts in 1 html file is easier
     allow for as many different chart types as the google chart api has with good defaults.
     """ 
@@ -50,6 +91,7 @@ def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=N
     """
     controlChartTitle = ''# title of chart
     controlChartFilename = ''
+    controlChartLables = copy.deepcopy(chartLabels) # keeps the list from breaking on multiple function calls with the same array of labels
     controlChartOptions = '' # the options properly formatted to be loaded into the HTML file
     htmlDataChart = '' # the working string of html of chart data 
     #handle options
@@ -74,7 +116,7 @@ def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=N
                 chartNumber += 1
     if chartTitle: #is there is a chart title use it
         controlChartTitle = chartTitle
-        #this covers the most common cases that will break js/HTML but I should simplify with RE
+        #this covers the most common cases that will break javascript/HTML but I should simplify with RE
         chartTitleTag = string.replace(controlChartTitle,' ','_')#remove spaces
         chartTitleTag = string.replace(chartTitleTag,'\t','_')#remove tabs
         chartTitleTag = string.replace(chartTitleTag,'.','_')#remove dot
@@ -116,31 +158,25 @@ def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=N
     elif chartType == 'ColumnChart':
         #similar to pie chart just with different tag
         htmlFollowingChart = string.replace(htmlFollowingChart_Pie , 'PieChart','ColumnChart')
-    if not chartLabels: #create default labels if none passed
+    if not controlChartLables: #create default labels if none passed
         workingLabel = "['Label'"
-        while chartDim > 0:
-            workingLabel +=", 'Data" + str(chartDim) + "'"
-            chartDim -= 1
+        lablesNeeded = chartDim
+        while lablesNeeded > 0:
+            workingLabel +=", 'Data" + str(lablesNeeded) + "'"
+            lablesNeeded -= 1
         workingLabel +="],"
         htmlPriorToChart += workingLabel
     else: # use existing labels
-        workingLabel ="['"+chartLabels.pop(0)+"'"
-        for l in chartLabels:
+        workingLabel ="['"+controlChartLables.pop(0)+"'"
+        for l in controlChartLables:
             workingLabel +=", '" + l + "'"
         workingLabel +="],"
         htmlPriorToChart += workingLabel
     # Next we create the chart in HTML
-    for datum in chartableDict.keys():
-        # add a label and data row to the htmlDataChart
-        if htmlDataChart:
-            htmlDataChart +=',' # if its not blank put a comma at the end, saves unneeded trailing comma         
-        if datum.find("'") + 1 : # fix raw ' in labels 
-            fixed_datum = datum
-            fixed_datum = fixed_datum.replace("'","feet")
-            htmlDataChart += "\n          ['" + fixed_datum  + "',   " + str(chartableDict[datum]) + '  ]' 
-        else: 
-            htmlDataChart += "\n          ['" + str(datum) + "',   " + str(chartableDict[datum]) + '  ]' 
-    htmlDataChart += '\n        ]);\n'    #close char
+    if chartDim == 1: 
+        htmlDataChart = pg1VarTable(chartableDict) # single entry data
+    else:
+        htmlDataChart = pgXVarTable(chartableDict) # Data in lists 
     # write all 4 parts of HTML to the file.
     f = open( controlChartFilename ,'w')
     f.write(htmlPriorToChart)
