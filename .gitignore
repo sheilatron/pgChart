@@ -1,36 +1,45 @@
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
+# mac cruft
 .DS_Store
-.AppleDouble
-.LSOverride
 
-# Icon must ends with two \r.
-Icon
+#emacs cruft
+*~
+*#*
+*flymake.py
+.ropeproject
 
-# Thumbnails
-._*
+# vim cruft
+*.swp
 
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
+# wing cruft
+*.wpr
+
+#buildout/virtualenv cruft
+bin
+lib
+include
+bootstrap.py
+develop-eggs
+.installed.cfg
+
+#python cruft
+*.egg
+*.egg-info
+.noseids
+*prof*
+pip-log.txt
+*.pyc
+
+# test cruft
+*_test
+.coverage
+
+# Sphinx cruft
+_build
+
+# backup cruft
+*.old
+*.orig
+
+# Misc cruft
+*.log
+*.pid
