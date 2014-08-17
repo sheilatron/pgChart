@@ -1,13 +1,55 @@
-#NapalmHorn Code
-#pgChart is an ultralightweight easy to use solution to creating charts in python
-#it use Google's Chart API 
-#Thus it creates good looking reasonable charts in a fast and easy way.
-#basiclly I wanted a fast easy lightweight(no big packages, dependences of complex api's) way to 
-#Take a log file count some stuff and make a chart.
+"""
+NapalmHorn Code
+
+pgChart is an ultralightweight easy to use solution to creating charts in
+python it use Google's Chart API Thus it creates good looking reasonable charts
+in a fast and easy way.  basiclly I wanted a fast easy lightweight(no big
+packages, dependences of complex api's) way to Take a log file count some stuff
+and make a chart.
+"""
+
 import os.path
 import webbrowser
 import string
 import copy
+
+PIE_CHART = 'PieChart'
+COLUMN_CHART = 'ColumnChart'
+
+
+class GoogleChart(object):
+    """
+    TODO
+    """
+
+    default_type = PIE_CHART
+    default_title = "My Chart"
+
+    def __init__(self, data, title=None, labels=None):
+        if title:
+            self.title = title
+        else:
+            self.title = self.default_title
+
+    def valid_html(self, chart_type=None):
+        """
+        Return True if html passes validation.
+        """
+        # TODO
+        if not chart_type:
+            chart_type = self.default_type
+
+    def create_file(self, chart_type=None):
+        # TODO
+
+    def render_html(self, chart_type=None):
+        """
+        Return the rendered html for the data and the specified chart type.
+        """
+        # TODO
+        
+    
+
 
 def pg1VarTable(chartableDict):
     """ Inputs the chartableDict from pgChart and creates a html table for use 
@@ -49,20 +91,25 @@ def pgXVarTable(chartableDict):
     return htmlDataChart
     
 
-def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=None , chartOptions=None , chartFileName=None, chartTitle=None, chartLabels=[]):
-    """Takes a dictionary with the subset of data that we want and makes a chart 
-    Input : chartableDict 
-        "chartTitle" => the title of the new chart, also the basis for the title of chart object
-            if absent or blank title will be 'chart title'
-        "chartOptions" => the options to be sent to google charts as a list of strings like: ["is3D: true"], 
-            if absent or blank defaults will be used
+def pgChart(chartableDict, popupChart=None, chartType='PieChart', returnhtml=None,
+           chartOptions=None , chartFileName=None, chartTitle=None, chartLabels=[]):
+    """Takes a dictionary with the subset of data that we want and makes a chart.
+    
+    Args: 
+        chartableDict(dict): a mapping containg the following keys:
+                "chartTitle" => the title of the new chart, also the basis for the title of chart object
+                    if absent or blank title will be 'chart title'
+                "chartOptions" => the options to be sent to google charts as a list of strings like: ["is3D: true"], 
+                    if absent or blank defaults will be used
         'popupChart' => if present indicates chart should open automatically
         'returnhtml' => returns a string of html instead of /(or addition to) saving to file.
         'chartFileName' => the filename to save the chart as if absent and not returnhtml save to lowest chart name
         'chartType' => type of chart to create, currently supports 'PieChart' , 'ColumnChart'
         'chartLabels' => a list strings that label the columns of data.
+
     Output: a file named whatever the chartableDict['control chart title'] + '.html',
         or, if absent or blank, chart\d+.html w/ \d+ as lowest possible choice starting at zero        
+
     TO DO:
     Split off each chart type to its own function called by this function so my code is more modular.
     add an option returnhtml to return a string of HTML  such that putting many charts in 1 html file is easier
@@ -187,3 +234,5 @@ def pgChart(chartableDict , popupChart=None, chartType='PieChart' , returnhtml=N
     if popupChart:
         webbrowser.open_new_tab(controlChartFilename) # call web browser to open html file.
     return None
+
+

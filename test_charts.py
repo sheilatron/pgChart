@@ -21,6 +21,9 @@ class IdealApi(unit.TestCase):
         self.testLables = ['Name' ,'Sickdays']
         self.chart = GoogleChart(data, title=self.testChartTitle, labels=self.testLables)
 
+    def test_data_is_valid_for_type(self):
+        
+        
     def test_valid_html(self):
         assert self.chart.is_valid_html()
 
@@ -31,8 +34,9 @@ class IdealApi(unit.TestCase):
     def test_popup(self):
         pass
 
-    def test_expected_content(self):
-        content = self.chart.rendered_html
+    def test_expected_content_for_piechart(self):
+        from pgchart import PIE_CHART
+        content = self.chart.render_html(PIE_CHART)
         assert self.testChartTitle in content
 
 
