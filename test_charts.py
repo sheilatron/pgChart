@@ -1,45 +1,83 @@
 import unittest
+import os.path
+
 from pgchart import * 
+
+
+class IdealApi(unit.TestCase):
+    """
+    Think about what would be the most useful, testable
+    API, resulting in the most readable code.
+    """
+    def setUp(self):
+        from pgchart import GoogleChart 
+        self.chart_data = dict(Seven=7, Mary= 1, Three=3)
+        self.testFileName = 'sevenmarythree.html'
+        self.testChartTitle = 'Seven Mary & Three'
+        # Google's chart API requires a list of strings that have
+        # a special structure, like so:
+        self.testChartOptions = ["title: 'Seven Mary Three - chart Options'",
+                            "is3D: true"]
+        self.testLables = ['Name' ,'Sickdays']
+        self.chart = GoogleChart(data, title=self.testChartTitle, labels=self.testLables)
+
+    def test_valid_html(self):
+        assert self.chart.is_valid_html()
+
+    def test_create_file(self):
+        create_file = self.chart.create_file(self.testFileName)
+        assert os.path.isfile(create_file)
+
+    def test_popup(self):
+        pass
+
+    def test_expected_content(self):
+        content = self.chart.rendered_html
+        assert self.testChartTitle in content
 
 
 class charttestcases(unittest.TestCase):
 
-    def test_pie_chart(self):
+    def setUp(self):
+        self.chart_data = dict(Seven=7, Mary= 1, Three=3)
+        self.testFileName = 'sevenmarythree.html'
+        self.testChartTitle = 'Seven Mary & Three'
+        # Google's chart API requires a list of strings that have
+        # a special structure, like so:
+        self.testChartOptions = ["title: 'Seven Mary Three - chart Options'",
+                            "is3D: true"]
+        self.testLables = ['Name' ,'Sickdays']
+        
+        self.testLable2 = ['Name' ,'Total Items', 'Desserts']
+        self.chart_data2 = dict()
+        self.chart_data2['Jake'] = [5, 1]
+        self.chart_data2['Mary'] = [3, 1]
+        self.chart_data2['Tracy'] = [5, 0]
+
+    def test_pie_chart_no_params(self):
         """Does the test case return true when expected"""
-        testCase = dict()
-        testFileName = 'sevenmarythree.html'
-        testChartTitle = 'Seven Mary & Three'
-        testChartOptions = ["title: 'Seven Mary Three - chart Options'" , "is3D: true"]
-        testLables = ['Name' ,'Sickdays']
-        expectedResult = True #expected result for good data
-        testCase['Seven'] = 7
-        testCase['Mary'] = 1
-        testCase['Three'] = 3
-        self.assertTrue(pgChart(testCase) == None) #no parameters
-        self.assertTrue(pgChart(testCase, popupChart=False, chartFileName=testFileName) == None) # tests file-name only parameter
-        self.assertTrue(pgChart(testCase, popupChart=False, chartOptions=testChartOptions, chartLabels=testLables ) == None) #test  options
-        self.assertTrue(pgChart(testCase,popupChart=False, chartType='ColumnChart', chartLabels=testLables) == None) #test  Lables
-        self.assertTrue(pgChart(testCase, popupChart=False, chartTitle=testChartTitle) == None) # test title 
+        # This test case exercises no params
+        self.assertTrue(pgChart(self.chart_data) == None)
+
+    def test_pie_chart_filename_only_param(self):
+        # tests file-name only parameter
+        self.assertTrue(pgChart(self.chart_data, popupChart=False,
+                        chartFileName=self.testFileName) == None) 
+        self.assertTrue(pgChart(self.chart_data, popupChart=False,
+                                chartOptions=self.testChartOptions,
+                                chartLabels=self.testLables ) == None) #test  options
+        #test  Lables
+        self.assertTrue(pgChart(self.chart_data, popupChart=False,
+                       chartType='ColumnChart', chartLabels=self.testLables) == None) 
+        self.assertTrue(pgChart(self.chart_data, popupChart=False,
+                                chartTitle=self.testChartTitle) == None) # test title 
     
     def test_col_chart(self):
         """Does the test case return true when expected"""
-        testCase = dict()
-        testFileName = 'sevenmarythree.html'
-        testChartTitle = 'Lunch Box Counts'
-        testChartOptions = ["title: 'Lunch Box Counts - chart Options'" , 'legend: { position: "none" }']
-        testLables = ['Name' ,'Total Items']
         expectedResult = True #expected result for good data
         popupChartsNow = True
-        testCase['Jake'] = 5
-        testCase['Mary'] = 3
-        testCase['Tracy'] = 5
-        self.assertTrue(pgChart(testCase,popupChart=popupChartsNow, chartType='ColumnChart', chartLabels=testLables) == None) #test  Lables  
-        testLable2 = ['Name' ,'Total Items', 'Desserts']
-        testCase2 = dict()
-        testCase2['Jake'] = [5, 1]
-        testCase2['Mary'] = [3, 1]
-        testCase2['Tracy'] = [5, 0]
-        self.assertTrue(pgChart(testCase2,popupChart=popupChartsNow, chartType='ColumnChart', chartLabels=testLable2) == None) #test  Lables  
+        self.assertTrue(pgChart(self.chart_data,popupChart=popupChartsNow, chartType='ColumnChart', chartLabels=self.testLables) == None) #test  Lables  
+        self.assertTrue(pgChart(self.chart_data2,popupChart=popupChartsNow, chartType='ColumnChart', chartLabels=self.testLable2) == None) #test  Lables  
     
    
 if __name__ == '__main__':
